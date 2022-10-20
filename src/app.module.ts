@@ -23,16 +23,16 @@ dotenv.config();
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        //uri: "mongodb+srv://barnaholl:Linoleum69@lifeachievements.vzcu98l.mongodb.net/life-achivements-db?retryWrites=true&w=majority"
         uri: process.env.NODE_ENV === "test" ? configService.get<string>("database.mongo_db_uri") : configService.get<string>("database.mongo_db_test_uri")
-        //configuration.database.mongo_db_uri : configuration.database.mongo_db_test_uri
       }),
     }),
-   /* GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-    }),*/
+      autoSchemaFile: true,
+      //include: [UserModule],
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService, UserService,],
+  providers: [AppService, UserService],
 })
 export class AppModule {}
