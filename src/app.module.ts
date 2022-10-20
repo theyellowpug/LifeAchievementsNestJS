@@ -7,16 +7,25 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import * as dotenv from 'dotenv';
+import configuration from './configuration/configuration';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 dotenv.config();
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration],
+    }),
     UserModule,
     MongooseModule.forRootAsync({
-      useFactory: () => ({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
         //uri: "mongodb+srv://barnaholl:Linoleum69@lifeachievements.vzcu98l.mongodb.net/life-achivements-db?retryWrites=true&w=majority"
-        uri: process.env.NODE_ENV === "test" ? process.env.MONGO_DB_URI: process.env.MONGO_DB_URI
+        uri: process.env.NODE_ENV === "test" ? configService.get<string>("database.mongo_db_uri") : configService.get<string>("database.mongo_db_test_uri")
+        //configuration.database.mongo_db_uri : configuration.database.mongo_db_test_uri
       }),
     }),
    /* GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -24,6 +33,6 @@ dotenv.config();
     }),*/
   ],
   controllers: [AppController],
-  providers: [AppService, UserService],
+  providers: [AppService, UserService,],
 })
 export class AppModule {}
